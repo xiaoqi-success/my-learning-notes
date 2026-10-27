@@ -46,6 +46,11 @@ void Dialog::on_countButton_clicked()
         ui->areaLabel_2->setText("请输入有效的数字！");
         return;
     }
+    // 新增：负数不能作为半径
+    if(radius < 0){
+        ui->areaLabel_2->setText("半径不能为负数！");
+        return;
+    }
     double area = radius * radius * PI;
     ui->areaLabel_2->setText(QString::number(area,'f',2));
 }
