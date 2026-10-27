@@ -10,7 +10,6 @@ const static double PI = 3.14;
 Dialog::Dialog(QWidget *parent)
     : QDialog(parent)
 {
-
     this->setFixedSize(600,300);
 
     radiusLabel = new QLabel("半径",this);

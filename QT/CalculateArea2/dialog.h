@@ -5,7 +5,7 @@
 
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
+#include<QPushButton>
 
 class Dialog : public QDialog
 {
