@@ -171,3 +171,17 @@ mainLayout->addWidget(button, 1, 1);
    - `QMap` 底层是红黑树，自动按 Key 升序排序。
    - `QHash` 底层是哈希表，完全无序，但查找速度极快。
    - *实操发现*：打印 QMap 时是有序的，而打印 QHash 时顺序是随机的。
+
+### 📌 Qt 进阶：QVariant 与 GUI 模块引入
+
+今天测试了 Qt 中极其强大的 `QVariant`（万能类型）类。
+
+1. **什么是 QVariant？**
+   它类似于 C++ 的 `union`，但更强大。它可以存 `int`、`double`、`QString`，也能存 `QColor` 甚至容器。利用 `QMap<QString, QVariant>` 可以轻松实现配置文件（混合类型的键值对）。
+2. **控制台项目引入 GUI 类的坑**：
+   在纯控制台项目（`QCoreApplication`）中使用 `QColor` 会报错。必须在 `.pro` 文件中添加 `QT += gui`，并 `#include <QColor>` 才能正常使用。
+3. **取值的两种方式**：
+   - 对于 Qt 内置基础类型，直接用 `.toInt()`、`.toString()` 即可。
+   - 对于复杂类型（如 `QColor`），必须用模板方式 `.value<QColor>()`，也就是“明确告诉程序从盲盒里掏出什么”。
+4. **安全提取**：
+   使用 `.canConvert<QColor>()` 先判断类型是否正确，避免强制提取导致乱码或崩溃。
