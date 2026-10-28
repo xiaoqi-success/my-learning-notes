@@ -4,8 +4,9 @@
 
 ## 📁 仓库目录
 
-- **`QT/CalculateArea`**：使用 Qt Designer (UI 拖拽) 实现圆面积计算。
-- **`QT/CalculateArea2`**：纯代码手写实现圆面积计算，加深对控件和布局的理解。
+- **`QT/CalculateArea`**：使用 Qt Designer (UI 拖拽) 实现圆面积计算
+- **`QT/CalculateArea2`**：纯代码手写实现圆面积计算，加深对控件和布局的理解
+- **`QT/QStringPracticeQString`**： 常用 API 实操
 
 ---
 
@@ -143,3 +144,16 @@ mainLayout->addWidget(button, 1, 1);
 // 如果不指定父窗口，最后需要把布局设置给窗口
 // setLayout(mainLayout);
 ```
+
+### 📌 QString 常用 API 实操总结
+
+今天我通过一个完整的 `QString` 测试 Demo，系统验证了其强大的字符串处理能力。重点掌握了以下高频操作：
+
+1. **拼接与格式化**：
+   - 强烈推荐 `QString("%1,%2").arg(a).arg(b)`。它比 `+` 号拼接性能更好，且支持强大的占位符替换。
+   - `arg(123, 5, 10, QChar('0'))` 这种高级用法可以轻松实现数字补零（输出 `00123`）。
+2. **查找与截取**：`indexOf()` 找位置，`left()`、`right()`、`mid()` 随心切分，`section()` 按规则分段。
+3. **切割与合并**：`split()` 配合 `QStringList` 可以把逗号分隔的数据拆开，再用 `join()` 拼回来。
+4. **空白处理**：`trimmed()` 去除首尾空格，`simplified()` 去除首尾并将中间连续空格压缩为单个，绝对是处理用户表单输入的神器。
+5. **数字互转**：`QString::number()` 与 `toInt(&ok)` 结合，通过 `bool` 变量精准拦截非法转换。
+
