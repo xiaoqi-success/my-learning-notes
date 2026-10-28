@@ -6,7 +6,8 @@
 
 - **`QT/CalculateArea`**：使用 Qt Designer (UI 拖拽) 实现圆面积计算
 - **`QT/CalculateArea2`**：纯代码手写实现圆面积计算，加深对控件和布局的理解
-- **`QT/QStringPracticeQString`**： 常用 API 实操
+- **`QT/QStringPracticeQString`**： QString类常用 API 实操
+- **`QT/ContainerPractice`** ：实操了容器类的核心知识点
 
 ---
 
@@ -157,3 +158,16 @@ mainLayout->addWidget(button, 1, 1);
 4. **空白处理**：`trimmed()` 去除首尾空格，`simplified()` 去除首尾并将中间连续空格压缩为单个，绝对是处理用户表单输入的神器。
 5. **数字互转**：`QString::number()` 与 `toInt(&ok)` 结合，通过 `bool` 变量精准拦截非法转换。
 
+### 📌 Qt 容器类与迭代器核心总结
+
+今天通过 `QT/ContainerPractice` 实操了容器类的核心知识点：
+
+1. **QList 基础**：最常用的列表，支持 `<<` 插入、`at()` 安全访问、`indexOf()` 查找。
+2. **迭代器三剑客（重点）**：
+   - `QListIterator`：Java 风格只读迭代器，用 `hasNext()` 和 `next()`。
+   - `QMutableListIterator`：Java 风格读写迭代器，可以在遍历时用 `remove()` 删除或用 `setValue()` 修改元素。
+   - `QList<int>::const_iterator`：STL 风格迭代器，像指针一样用 `++` 和 `*`，效率最高，最贴近原生 C++。
+3. **QMap vs QHash**：
+   - `QMap` 底层是红黑树，自动按 Key 升序排序。
+   - `QHash` 底层是哈希表，完全无序，但查找速度极快。
+   - *实操发现*：打印 QMap 时是有序的，而打印 QHash 时顺序是随机的。
