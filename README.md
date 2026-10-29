@@ -8,6 +8,7 @@
 - **`QT/CalculateArea2`**：纯代码手写实现圆面积计算，加深对控件和布局的理解
 - **`QT/QStringPracticeQString`**： QString类常用 API 实操
 - **`QT/ContainerPractice`** ：实操了容器类的核心知识点
+- **`QT/TimeClock`**：利用纯代码布局（无 `.ui` 文件）实现一个数字时钟，能够实时显示当前的日期（年月日）和时间（时分秒），并带有“开始/暂停”计时功能
 
 ---
 
@@ -185,3 +186,68 @@ mainLayout->addWidget(button, 1, 1);
    - 对于复杂类型（如 `QColor`），必须用模板方式 `.value<QColor>()`，也就是“明确告诉程序从盲盒里掏出什么”。
 4. **安全提取**：
    使用 `.canConvert<QColor>()` 先判断类型是否正确，避免强制提取导致乱码或崩溃。
+
+### 📌 Qt 小项目实战：数字时钟与日历
+
+#### 🛠️ 核心技术栈拆解
+
+1. **获取与格式化时间 (`QDateTime`)**
+   - 在 Qt 中，`QDateTime::currentDateTime()` 可以获取系统当前的绝对时间和日期。
+   - 使用 `.toString()` 函数进行格式化转换：
+     - 日期格式：`toString("yyyy-MM-dd")` （`yyyy` 代表四位年份，`MM` 代表月份，`dd` 代表日期）。
+     - 时间格式：`toString("HH:mm:ss")` （`HH` 代表 24 小时制，如果是 `hh` 则是 12 小时制；`mm` 是分钟，`ss` 是秒）。
+   - **注意**：格式化后的结果依然是 `QString`，可以直接用 `setText()` 赋值给 `QLabel` 显示。
+2. **定时器机制 (`QTimer`)**
+   - `QTimer` 是 Qt 中实现周期性任务的神器。它就像是一个闹钟，每隔一段时间就会“响”一次。
+   - **设置周期**：`timer->setInterval(1000);` 表示周期为 1000 毫秒（即 1 秒）。
+   - **启动与停止**：使用 `timer->start()` 启动，`timer->stop()` 停止。
+   - **状态判断**：使用 `timer->isActive()` 判断当前定时器是否正在运行，返回 `bool` 值。
+3. **信号与槽的动态交互**
+   - 核心逻辑：将 `QTimer` 的 `timeout()` 信号，连接到我们自定义的槽函数 `updateTime()` 上。这样每隔 1 秒钟，`updateTime()` 就会被自动调用一次，从而实现界面的刷新。
+   - 按钮交互：将“开始/停止”按钮的 `clicked()` 信号连接到 `toggleTimer()` 槽函数，在函数内部判断定时器状态，实现一键启停。
+4. **纯代码界面布局 (`QVBoxLayout`)**
+   - 没有使用 Qt Designer 拖拽，纯手工创建了 `QLabel` 和 `QPushButton`。
+   - 使用了垂直布局 `QVBoxLayout` 将日期、时间、按钮从上到下依次排列。
+   - **UI 优化小技巧**：通过获取控件的字体对象（`QFont font = timeLabel->font();`），修改字号（`setPointSize(30)`）后重新赋给控件，并设置居中对齐（`setAlignment(Qt::AlignCenter)`），让时间显示更加醒目。
+
+#### 💻 核心代码片段（逻辑展示）
+
+```C++
+// 1. 初始化定时器
+timer = new QTimer(this);
+timer->setInterval(1000); // 1秒触发一次
+
+// 2. 信号与槽连接：时间一到，就去执行 updateTime 刷新界面
+connect(timer, &QTimer::timeout, this, &Dialog::updateTime);
+connect(startBtn, &QPushButton::clicked, this, &Dialog::toggleTimer);
+
+// 3. 核心刷新逻辑
+void Dialog::updateTime()
+{
+    QDateTime current = QDateTime::currentDateTime();
+    QString dateStr = current.toString("yyyy-MM-dd");
+    QString timeStr = current.toString("HH:mm:ss");
+    
+    // 更新到界面上
+    dateLabel->setText(dateStr);
+    timeLabel->setText(timeStr);
+}
+
+// 4. 一键启停控制
+void Dialog::toggleTimer()
+{
+    if(timer->isActive()){
+        timer->stop();
+        startBtn->setText("开始计时");
+    }else{
+        timer->start();
+        startBtn->setText("停止计时");
+    }
+}
+```
+
+#### 🚧 开发中遇到的坑与总结
+
+- **时间格式大小写**：一开始没有区分 `HH` 和 `hh`，导致对 24 小时制理解不深。经过测试发现，`HH` 才是标准的 24 小时制。
+- **界面死板**：最初的 Label 字体太小，后来通过重新设置 `QFont` 实现了大字号显示，视觉效果提升明显。
+- **定时器本质**：理解了 `QTimer` 本身不是循环，而是通过发出信号来触发事件。这种事件驱动的机制，比传统 C 语言里的 `while` 死循环加 `sleep` 要优雅得多，不会卡死界面。
