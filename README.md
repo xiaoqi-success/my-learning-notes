@@ -9,6 +9,7 @@
 - **`QT/QStringPracticeQString`**： QString类常用 API 实操
 - **`QT/ContainerPractice`** ：实操了容器类的核心知识点
 - **`QT/TimeClock`**：利用纯代码布局（无 `.ui` 文件）实现一个数字时钟，能够实时显示当前的日期（年月日）和时间（时分秒），并带有“开始/暂停”计时功能
+- **`QT/CheckableTreeWidget`**：实现带复选框的树形控件
 
 ---
 
@@ -251,3 +252,26 @@ void Dialog::toggleTimer()
 - **时间格式大小写**：一开始没有区分 `HH` 和 `hh`，导致对 24 小时制理解不深。经过测试发现，`HH` 才是标准的 24 小时制。
 - **界面死板**：最初的 Label 字体太小，后来通过重新设置 `QFont` 实现了大字号显示，视觉效果提升明显。
 - **定时器本质**：理解了 `QTimer` 本身不是循环，而是通过发出信号来触发事件。这种事件驱动的机制，比传统 C 语言里的 `while` 死循环加 `sleep` 要优雅得多，不会卡死界面。
+
+---
+
+## 💻 进阶项目：带复选框的树形控件 (QTreeWidget)
+
+**📂 项目路径**：`QT/CheckableTreeWidget`
+
+### 📌 核心功能
+实现了一个类似于联系人列表或权限管理界面的树形控件，带有复选框，并且完美处理了**父子节点状态联动（三态逻辑）**。
+
+### 📝 知识点总结
+
+1. **节点设置 (`QTreeWidgetItem`)**：
+   使用 `setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable)` 可以让节点前面出现复选框，并且允许用户交互。
+2. **向下级联（父影响子）**：
+   点击父节点时，遍历其所有子节点，使用 `setCheckState(0, Qt::Checked)` 让子节点全部同步选中或取消。
+3. **向上反馈（子影响父）与三态 (`PartiallyChecked`)**：
+   点击子节点时，利用 `updateParentItem` 函数统计父节点下被选中的子节点个数：
+   - 如果选中数为 0，父节点设为 `Qt::Unchecked`。
+   - 如果选中数等于总子节点数，父节点设为 `Qt::Checked`。
+   - **如果选中数介于两者之间，父节点设为 `Qt::PartiallyChecked`（半选状态，即灰色对勾）。**
+4. **⚠️ 避坑指南（死循环问题）**：
+   在代码中批量修改子节点的 `checkState` 时，也会再次触发 `itemChanged` 信号，容易导致无限递归。可以通过加入一个 `bool isUpdating` 标志位作为“锁”，在批量修改时屏蔽信号，从而完美解决。
