@@ -10,6 +10,7 @@
 - **`QT/ContainerPractice`** ：实操了容器类的核心知识点
 - **`QT/TimeClock`**：利用纯代码布局（无 `.ui` 文件）实现一个数字时钟，能够实时显示当前的日期（年月日）和时间（时分秒），并带有“开始/暂停”计时功能
 - **`QT/CheckableTreeWidget`**：实现带复选框的树形控件
+- **`QT/BuddyAssignment`**：实现使用快捷键的方式而不是使用点击按钮来计时
 
 ---
 
@@ -275,3 +276,9 @@ void Dialog::toggleTimer()
    - **如果选中数介于两者之间，父节点设为 `Qt::PartiallyChecked`（半选状态，即灰色对勾）。**
 4. **⚠️ 避坑指南（死循环问题）**：
    在代码中批量修改子节点的 `checkState` 时，也会再次触发 `itemChanged` 信号，容易导致无限递归。可以通过加入一个 `bool isUpdating` 标志位作为“锁”，在批量修改时屏蔽信号，从而完美解决。
+
+## 📕 Qt 布局与美化实战 (数字闹钟)
+- **嵌套布局**：使用 `QHBoxLayout` 和 `QVBoxLayout` 实现“上边文字，下边按钮”的排版。
+- **伙伴模式**：通过代码 `QLabel::setBuddy()` 绑定快捷键（Alt+S）。
+- **QSS 样式**：使用 `setStyleSheet()` 快速修改按钮颜色、圆角，实现状态切换时的动态颜色变化。
+- **QTimer 联动**：将定时器 `timeout` 信号与刷新槽函数绑定，实现 2 秒一跳的时间更新。
