@@ -13,6 +13,7 @@
 - **`QT/BuddyAssignment`**：实现使用快捷键的方式而不是使用点击按钮来计时
 - **`QT/SplitterDemo`**:QSplitter 分割窗口与状态持久化
 - **`QT/DockWindows`**：QDockWidget停靠窗口的使用
+- **`QT/StackedWidget`**：界面导航神器
 
 ---
 
@@ -477,4 +478,64 @@ addDockWidget(Qt::RightDockWidgetArea, dock3);
 tabifyDockWidget(dock2, dock3);
 dock2->raise(); 
 ```
+
+## 📌 界面导航神器：QStackedWidget (堆栈窗体)
+
+**📂 项目路径**：`QT/StackedWidget`
+
+**🎯 项目背景：**
+做类似手机设置、QQ 侧边栏这种“左侧点击菜单，右侧切换不同内容页”的界面时，最常用的控件就是 `QStackedWidget`。
+
+**💡 与 QDockWidget 的本质区别：**
+
+- `QDockWidget`：可以拖拽、浮动、停靠的附属面板。
+- `QStackedWidget`：**固定位置的多页面容器，同一时间只显示一页**，像一摞卡片，翻到哪张显示哪张。
+
+### 🛠️ 核心知识点与代码拆解
+
+1. **添加页面 (`addWidget`)**：
+   使用 `stack->addWidget(pageWidget)` 将多个页面（如 `QLabel` 或自定义的 `QWidget`）依次压入栈中。它们会按插入顺序分配索引（0, 1, 2...）。
+
+2. **信号槽完美联动（最优雅的操作）**：
+   不需要写 `if-else` 判断。左侧列表的 `currentRowChanged(int)` 信号，可以直接连接到右侧堆叠窗口的 `setCurrentIndex(int)` 槽函数。
+
+   ```cpp
+   connect(list, &QListWidget::currentRowChanged, stack, &QStackedWidget::setCurrentIndex);
+   *原理：当列表中选中行的索引变化时，发出的整数直接作为 `QStackedWidget` 要切换的页面索引，实现完美同步。*
+   ```
+
+3. **初始化默认页 (`setCurrentRow`)**：
+   在构造函数末尾调用 `list->setCurrentRow(1)`，不仅能让列表默认选中第二项，还会**自动触发一次 `currentRowChanged` 信号**，让右侧也同步显示第二页。
+
+4. **布局比例分配 (`setStretchFactor`)**：
+   在水平布局中，使用 `setStretchFactor(list, 1)` 和 `setStretchFactor(stack, 3)`，让左侧导航栏和右侧内容区实现 1:3 的宽度比例，拉伸窗口时也能完美保持比例。
+
+### 💻 核心代码结构展示
+
+```C++
+// 1. 创建左侧导航列表
+QListWidget *list = new QListWidget(this);
+list->insertItem(0, "Window1");
+list->insertItem(1, "Window2");
+list->insertItem(2, "Window3");
+
+// 2. 创建右侧堆叠容器
+QStackedWidget *stack = new QStackedWidget(this);
+stack->addWidget(new QLabel("页面1内容"));
+stack->addWidget(new QLabel("页面2内容"));
+stack->addWidget(new QLabel("页面3内容"));
+
+// 3. 布局设置与比例分配
+QHBoxLayout *mainLayout = new QHBoxLayout(this);
+mainLayout->addWidget(list);
+mainLayout->addWidget(stack);
+mainLayout->setStretchFactor(list, 1);  // 左侧占1份
+mainLayout->setStretchFactor(stack, 3); // 右侧占3份
+
+// 4. 核心联动：索引变化自动切页
+connect(list, &QListWidget::currentRowChanged, stack, &QStackedWidget::setCurrentIndex);
+list->setCurrentRow(0); // 默认显示第一页
+```
+
+
 
