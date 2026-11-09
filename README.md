@@ -1,4 +1,4 @@
-# 🚀 我的编程学习之路
+# 🚀 我的编程学习之路   
 
 欢迎来到我的代码仓库！这里记录了我从零开始学习编程的点点滴滴，主要包含 Qt (C++) 基础、算法练习以及日常代码积累。
 
@@ -11,6 +11,7 @@
 - **`QT/TimeClock`**：利用纯代码布局（无 `.ui` 文件）实现一个数字时钟，能够实时显示当前的日期（年月日）和时间（时分秒），并带有“开始/暂停”计时功能
 - **`QT/CheckableTreeWidget`**：实现带复选框的树形控件
 - **`QT/BuddyAssignment`**：实现使用快捷键的方式而不是使用点击按钮来计时
+- **`QT/SplitterDemo`**:QSplitter 分割窗口与状态持久化
 
 ---
 
@@ -278,7 +279,106 @@ void Dialog::toggleTimer()
    在代码中批量修改子节点的 `checkState` 时，也会再次触发 `itemChanged` 信号，容易导致无限递归。可以通过加入一个 `bool isUpdating` 标志位作为“锁”，在批量修改时屏蔽信号，从而完美解决。
 
 ## 📕 Qt 布局与美化实战 (数字闹钟)
+
 - **嵌套布局**：使用 `QHBoxLayout` 和 `QVBoxLayout` 实现“上边文字，下边按钮”的排版。
 - **伙伴模式**：通过代码 `QLabel::setBuddy()` 绑定快捷键（Alt+S）。
 - **QSS 样式**：使用 `setStyleSheet()` 快速修改按钮颜色、圆角，实现状态切换时的动态颜色变化。
 - **QTimer 联动**：将定时器 `timeout` 信号与刷新槽函数绑定，实现 2 秒一跳的时间更新。
+
+## 📌 高级界面布局实战：QSplitter 分割窗口与状态持久化
+
+**📂 项目路径**：`QT/SplitterDemo`
+
+#### 🎯 项目描述
+
+实现了一个类似代码编辑器（如 VS Code）的嵌套分割窗口界面：左侧为固定比例的代码区，右侧为可上下拖拽的预览区。并且实现了**软件关闭时自动保存布局比例，下次启动时自动恢复**的高级功能。
+
+#### 🛠️ 核心知识点深度拆解
+
+1.**分割窗口的嵌套 (`QSplitter`)**
+
+- 基础用法：`new QSplitter(Qt::Horizontal, parent)` 可以创建一个水平分割器。
+- **嵌套技巧**：把一个 `QSplitter` 作为另一个 `QSplitter` 的子控件，就能实现复杂的“左一右二”或“上一中二”的布局。在项目中，右侧的垂直分割器就是以主水平分割器为父窗口。
+
+2.**自适应拉伸因子 (`setStretchFactor`)**
+
+- 代码：`splitterMain->setStretchFactor(1, 1);`
+- 作用：当拉伸整个主窗口时，索引为 1 的控件（右侧）会自动拉宽，而左侧保持原样。如果不设置，左右两边会按比例平分新增空间。
+
+3.**折叠权限控制 (`setCollapsible`)**
+
+- 代码：`splitterMain->setCollapsible(0, false);`
+- 作用：防止用户把左侧的核心区域直接拖拽到 0 宽度，避免界面布局被彻底破坏。
+
+4.**布局状态的持久化 (`QSettings`) —— 🔥 高光难点**
+
+- **保存状态**：`QSplitter::saveState()` 会把当前分割条的位置保存为 `QByteArray`（二进制数据）。
+- **恢复状态**：`QSplitter::restoreState()` 可以在软件启动时读取数据并还原比例。
+- **配置文件读写**：利用 `QSettings("OrganizationName", "AppName")`，跨平台地将数据写入 Windows 注册表或 Mac 的 plist 文件中。
+
+#### ⚠️ 实战踩坑与避坑指南
+
+**1. 拖拽不实时更新的问题**
+如果处理的界面非常复杂，拖拽分割条时实时重绘会严重卡顿。
+
+- **解决方案**：`splitterRight->setOpaqueResize(false);`。这样拖拽时只显示一条灰色的虚线，释放鼠标后才真正改变布局。
+
+**2. Lambda 表达式捕获的“致命坑”（极其重要！）**
+在程序退出前保存状态时，使用了 `QApplication::aboutToQuit` 信号和 Lambda 表达式：
+
+```C++
+// ❌ 错误示范：会导致退出时崩溃
+// QObject::connect(&a, &QApplication::aboutToQuit, [&](){
+//    settings.setValue(...); // 此时的 settings 可能已经被析构了
+// });
+
+// ✅ 正确示范：在 Lambda 内部重新实例化
+QObject::connect(&a, &QApplication::aboutToQuit, [&](){
+    QSettings settings("OrganizationName", "SplitterDemo"); 
+    settings.setValue("splitterState", splitterMain->saveState());
+});
+```
+
+**原因**：如果在外部定义了 `QSettings settings;`，当主窗口关闭时，栈上的 `settings` 可能已经被销毁。如果 Lambda 捕获了它的引用 `[&]`，在程序退出的瞬间再去调用它，就会导致**野指针崩溃**。在 Lambda 内部局部新建对象是最安全的做法。
+
+#### 💻 核心代码结构展示
+
+```C++
+// 1. 创建主水平分割器
+QSplitter *splitterMain = new QSplitter(Qt::Horizontal, 0);
+
+// 2. 创建右侧垂直分割器，并作为主分割器的子控件
+QSplitter *splitterRight = new QSplitter(Qt::Vertical, splitterMain);
+splitterRight->setOpaqueResize(false); // 关闭实时更新，防卡顿
+
+// 3. 填充控件
+QTextEdit *textLeft = new QTextEdit("Left", splitterMain);
+QTextEdit *textUp = new QTextEdit("Top", splitterRight);
+QTextEdit *textBottom = new QTextEdit("Bottom", splitterRight);
+
+// 4. 高级属性设置
+splitterMain->setStretchFactor(1, 1); // 右侧自适应拉伸
+splitterMain->setCollapsible(0, false); // 左侧不可折叠
+splitterMain->setHandleWidth(5); // 分割条宽度
+
+// 5. 状态恢复与保存 (QSettings)
+QSettings settings("Org", "App");
+QByteArray state = settings.value("splitterState").toByteArray();
+if(!state.isEmpty()){
+    splitterMain->restoreState(state);
+} else {
+    splitterMain->setSizes(QList<int>() << 100 << 400); // 初始比例 1:4
+}
+
+// 退出时自动保存状态 (Lambda内重新实例化QSettings)
+QObject::connect(&a, &QApplication::aboutToQuit, [&](){
+    QSettings localSettings("Org", "App");
+    localSettings.setValue("splitterState", splitterMain->saveState());
+});
+```
+
+#### 🚀 进阶优化建议 (给未来的自己)
+
+虽然现在把代码全堆在 `main.cpp` 里跑通了，但在实际企业开发中，应该把这些逻辑封装到一个自定义的 `QWidget` 类（比如 `SplitterWindow`）中，方便在其他项目里复用。
+
+1
