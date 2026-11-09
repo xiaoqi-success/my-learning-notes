@@ -12,7 +12,7 @@
 - **`QT/CheckableTreeWidget`**：实现带复选框的树形控件
 - **`QT/BuddyAssignment`**：实现使用快捷键的方式而不是使用点击按钮来计时
 - **`QT/SplitterDemo`**:QSplitter 分割窗口与状态持久化
-- **`QT/DockWindows`**：
+- **`QT/DockWindows`**：QDockWidget停靠窗口的使用
 
 ---
 
