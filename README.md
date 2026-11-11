@@ -540,6 +540,8 @@ list->setCurrentRow(0); // 默认显示第一页
 
 ## 📌 终极实战：多页面用户资料修改系统
 
+<img src="assets/image-20261111202019776.png" alt="image-20261111202019776" style="zoom: 80%;" />
+
 **📂 项目路径**：`QT/UserInfoManager`
 
 **🎯 项目背景：**
