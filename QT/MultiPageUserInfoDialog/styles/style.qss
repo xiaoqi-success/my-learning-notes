@@ -1,0 +1,20 @@
+QListWidget{
+    background-color:#ffffff;
+    border:1px solid #dcdcdc;
+    border-radius:6px;
+    outline:0;          /* 去掉聚焦时的虚线框 */
+}
+
+QListWidget::item {
+    padding: 6px;
+}
+
+QListWidget::item:hover{
+    background-color:#a7f3ff;
+}
+
+QListWidget::item:selected{
+    color: #ff0000;
+    background-color: #e6f2ff;  /* 加个浅色底，否则选中背景可能是系统默认灰 */
+}
+
