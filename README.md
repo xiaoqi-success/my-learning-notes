@@ -14,6 +14,7 @@
 - **`QT/SplitterDemo`**:QSplitter 分割窗口与状态持久化
 - **`QT/DockWindows`**：QDockWidget停靠窗口的使用
 - **`QT/StackedWidget`**：界面导航神器
+- **`QT/UserInfoManager`**：多页面用户资料修改系统
 
 ---
 
@@ -537,5 +538,55 @@ connect(list, &QListWidget::currentRowChanged, stack, &QStackedWidget::setCurren
 list->setCurrentRow(0); // 默认显示第一页
 ```
 
+## 📌 终极实战：多页面用户资料修改系统
 
+**📂 项目路径**：`QT/UserInfoManager`
 
+**🎯 项目背景：**
+这是一次将所有基础组件融会贯通的综合实战。实现了一个类似后台管理系统的用户资料编辑界面，左侧导航，右侧多页面切换，底部配有操作按钮。
+
+### 🏗️ 架构拆解
+1. **外层框架 (`QSplitter`)**：主界面采用水平分割器，左侧占 1 份宽（导航），右侧占 5 份宽（内容），用户可自由拖拽调整比例。
+2. **左侧导航 (`QListWidget`)**：包含“基本信息”、“联系方式”、“详细资料”三项。
+3. **右侧核心 (`QStackedWidget`)**：包含三个独立的自定义 `QWidget` 页面，通过信号槽与左侧列表联动切换页面。
+4. **底部操作栏 (`QHBoxLayout`)**：利用 `addStretch(1)` 添加弹簧，将“修改”和“关闭”按钮优雅地挤到右侧。
+
+### 🛠️ 核心技术亮点
+
+1. **信号槽的跨类联动**：
+
+   ```cpp
+   connect(list, &QListWidget::currentRowChanged, content, &MultiPageUserInfoDialog::switchPage);
+   ```
+
+   在 main 函数中，将左侧列表的索引变化，直接绑定到右侧容器对象的公开槽函数，实现点击左侧“基本信息”，右侧立刻切换到对应页面的效果。
+
+2. **下拉框级联联动 (Detail 类)**：
+
+   通过监听国家下拉框的 `currentTextChanged` 信号，动态清空并加载省份下拉框的数据。
+
+   ```cpp
+   connect(countryComboBox, &QComboBox::currentTextChanged, this, &Detail::onCountryChanged);
+   ```
+
+   *实现逻辑：利用 `clear()` 清空旧数据，再根据当前国家名判断，使用 `addItems()` 添加对应的省份列表。*
+
+3. **复杂布局嵌套 (BaseInfo 类)**：
+
+   - 左侧使用 `QGridLayout` 做表单排版，并通过 `setColumnStretch(0, 1)` 和 `setColumnStretch(1, 3)` 实现标签与输入框 1:3 的宽度比例。
+   - 右侧将头像部分用 `QHBoxLayout` 水平排列，再整体用 `QVBoxLayout` 垂直组合。
+
+### 🚧 踩坑与避坑
+
+- **跨类访问**：不要尝试在外部直接访问另一个类内部的 `private` 成员（如 `content->stack`），必须通过在该类中提供 `public slots` 或 `public` 接口来安全调用。
+- **弹簧控件**：布局中善用 `addStretch()` 可以将按钮挤到窗口边缘，避免“死板”的靠左对齐。
+- **窗口尺寸设置**：在 `QSplitter` 这种顶级窗口上，合理使用 `resize()` 设置初始大小，避免误用 `setMinimumSize` 导致窗口无法放大。
+
+### 🚧 实战史诗级大坑：QDialog 无法嵌入 QSplitter
+在把 `MultiPageUserInfoDialog` 嵌入到主界面的 `QSplitter` 时，遇到了严重的**运行空白**问题，折腾了很久终于定位到原因：
+- **原因**：`QDialog` 自带顶层窗口标记，本质是独立的系统弹窗，不能被 `QSplitter` 当作普通子控件进行布局管理。
+- **解决**：必须把该类的基类从 `QDialog` 改为 `QWidget`。
+- **经验总结**：
+  - 独立弹窗用 `QDialog`。
+  - 主框架用 `QMainWindow`。
+  - **凡是需要被塞进布局、Splitter、StackedWidget 里的“页面/面板”，一律使用 `QWidget` 作为基类。**
