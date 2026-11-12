@@ -15,7 +15,7 @@
 ### 🟩 Qt 界面开发进阶
 - **`QT/TimeClock`**：[数字时钟 (QTimer/日期格式化)](./QT/TimeClock/README.md)
 - **`QT/BuddyAssignment`**：[伙伴编辑模式与快捷键 (Buddy)](./QT/BuddyAssignment/README.md)
-- **`QT/BasicDialogManager`**：[各种标准对话框大全](./QT/StandardDialogs/README.md)
+- **`QT/BasicDialogManager`**：[各种标准对话框大全](./QT/BasicDialogManager/README.md)
 - **`QT/CheckableTreeWidget`**：[带复选框的树形控件与三态联动](./QT/CheckableTreeWidget/README.md)
 
 ### 🟨 Qt 高级布局与综合实战
