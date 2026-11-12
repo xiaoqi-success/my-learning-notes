@@ -15,6 +15,7 @@
 - **`QT/DockWindows`**：QDockWidget停靠窗口的使用
 - **`QT/StackedWidget`**：界面导航神器
 - **`QT/UserInfoManager`**：多页面用户资料修改系统
+- **`QT/StandardDialogs`**：标准对话框一网打尽
 
 ---
 
@@ -592,3 +593,58 @@ list->setCurrentRow(0); // 默认显示第一页
   - 独立弹窗用 `QDialog`。
   - 主框架用 `QMainWindow`。
   - **凡是需要被塞进布局、Splitter、StackedWidget 里的“页面/面板”，一律使用 `QWidget` 作为基类。**
+
+## 📌 交互的灵魂：Qt 标准对话框 (Standard Dialogs)
+
+![image-20261112161457683](assets/image-20261112161457683.png)
+
+**📂 项目路径**：`QT/StandardDialogs`
+
+**🎯 项目背景：**
+桌面软件离不开与用户的交互。今天实操了 Qt 提供的六大标准对话框，全面掌握了文件读取、颜色/字体设置、数据输入以及各种消息提示框的使用。
+
+### 🛠️ 核心知识点与代码拆解
+
+**1. 文件选择 (`QFileDialog`)**
+
+*   静态方法 `getOpenFileName` 一行代码即可唤起系统文件选择器。
+*   **过滤器**：使用 `"C++ file(*.cpp);;C file(*.c)"` 可以让用户只看特定后缀的文件。双分号 `;;` 用于分隔不同类型的过滤器。
+
+**2. 颜色选择 (`QColorDialog`)**
+*   静态方法 `getColor` 返回一个 `QColor` 对象。
+*   **避坑**：用户点击“取消”时，返回的颜色是无效的。必须用 `color.isValid()` 判断后再去修改界面颜色。
+
+**3. 字体选择 (`QFontDialog`)**
+*   `getFont(&ok, initialFont, parent, title)`。
+*   必须传入 `bool *ok` 指针。只有 `ok == true` 时，才说明用户点击了确定并选择了新字体。
+
+**4. 标准输入 (`QInputDialog`) —— 极其实用**
+*   **获取字符串**：`getText()`，可设置回显模式（如密码框 `QLineEdit::Password`）。
+*   **获取下拉选项**：`getItem()`，传入 `QStringList` 即可生成下拉框。
+*   **获取数字**：`getInt()` 和 `getDouble()`，**自带范围限制**，防止用户输入“10000岁”这种离谱数据。浮点数还能指定保留几位小数。
+
+**5. 消息提示框 (`QMessageBox`) —— 最常用**
+*   **四种预设图标**：
+  - `question()`：问号图标，常用于确认操作（如：是否保存？）。
+  - `information()`：感叹号/信息图标，用于普通提示。
+  - `warning()`：黄色警告三角。
+  - `critical()`：红色错误叉号。
+*   **标准按钮组**：如 `Yes | No`、`Save | Discard | Cancel`。可以通过返回值来判断用户到底点了哪个按钮。
+*   **关于信息**：`about()` 弹出软件信息，`aboutQt()` 弹出 Qt 框架的版权信息。
+
+### 💻 核心代码结构展示 (消息框的返回值判断)
+
+```cpp
+// 1. 弹出带多个按钮的警告框
+auto ret = QMessageBox::warning(this, "Warning", "文件未保存，是否保存？",
+                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                                QMessageBox::Save);
+
+// 2. 根据用户的点击结果，执行不同逻辑
+if(ret == QMessageBox::Save){
+    // 执行保存逻辑
+} else if(ret == QMessageBox::Discard){
+    // 放弃保存，直接退出
+} else if(ret == QMessageBox::Cancel){
+    // 取消退出，返回编辑
+}
