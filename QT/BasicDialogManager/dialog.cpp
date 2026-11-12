@@ -4,6 +4,8 @@
 #include <QColorDialog>
 #include <QFontDialog>
 #include <QFont>
+#include <QMessageBox>
+#include <QPixMap>
 
 // 演示各种标准对话框的使用
 
@@ -73,6 +75,13 @@ Dialog::Dialog(QWidget *parent)
     msgBtn = new QPushButton("标准消息对话框");
     mainLayout->addWidget(msgBtn,3,1);
     connect(msgBtn,&QPushButton::clicked,this,&Dialog::showMsg);
+
+    customBtn = new QPushButton("用户自定义消息对话框实例");
+    label = new QLabel();
+    label->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    mainLayout->addWidget(customBtn,4,0);
+    mainLayout->addWidget(label,4,1);
+    connect(customBtn,&QPushButton::clicked,this,&Dialog::showCustomDlg);
 }
 
 Dialog::~Dialog()
@@ -114,6 +123,41 @@ void Dialog::showMsg()
 {
     msgDlg = new MsgBoxDlg(this);
     msgDlg->show();
+}
+
+void Dialog::showCustomDlg()
+{
+    label->setText("Custom Message Box");
+    QMessageBox customMsgBox;
+    customMsgBox.setWindowTitle("用户自定义消息框");// 设置消息框的标题
+    // 定义消息框所需要的按钮，由于QMessageBox::standardButtons只提供了常用的一些按钮，并不能满足所有应用的需求
+    // 所以QMessageBox类提供了一个addButton()函数来为消息框增加自定义的按钮
+    // addButton()函数的第一个参数为按钮显示的名字，第二个参数为按钮类型的描述(ActionRole:点击它通常意味着用户同意了某个操作)
+    QPushButton *yesBtn = customMsgBox.addButton("Yes",QMessageBox::ActionRole);
+    QPushButton *noBtn = customMsgBox.addButton("No",QMessageBox::ActionRole);
+    // 为addButton()函数加入一个标准按钮。消息框将会按调用 addButton()函数的先后顺序在消息框中由左至右地依次插入按钮。
+    QPushButton *cancelBtn = customMsgBox.addButton(QMessageBox::Cancel);
+
+//    customMsgBox.setIconPixmap(":/icons/msg.png");// 直接进去会导致图片很大不好看，通过下面的步骤来设置一下即可
+
+    // 1. 加载原图
+    QPixmap originalPixmap(":/icons/msg.png");
+    // 2. 缩放到 48x48，并保持长宽比，使用平滑缩放
+    QPixmap scaledPixmap = originalPixmap.scaled(48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    // 3. 设置进去
+    customMsgBox.setIconPixmap(scaledPixmap);// 直接进去会导致图片很大不好看，通过上面的步骤来设置一下即可
+
+    customMsgBox.setText("测试自定义消息框");
+    customMsgBox.exec();// 显示此自定义消息框
+    if(customMsgBox.clickedButton() == yesBtn){
+        label->setText("Custom Message Box/Yes");
+    }
+    if(customMsgBox.clickedButton() == noBtn){
+        label->setText("Custom Message Box/No");
+    }
+    if(customMsgBox.clickedButton() == cancelBtn){
+        label->setText("Custom Message Box/Cancel");
+    }
 }
 
 

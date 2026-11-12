@@ -36,6 +36,10 @@ private:
     QPushButton *msgBtn;
     MsgBoxDlg *msgDlg;
 
+    // 补充：自定义消息框
+    QPushButton *customBtn;
+    QLabel *label;
+
 
 private slots:
     void showFile();
@@ -43,5 +47,6 @@ private slots:
     void showFont();
     void showInputDlg();
     void showMsg();
+    void showCustomDlg();
 };
 #endif // DIALOG_H
