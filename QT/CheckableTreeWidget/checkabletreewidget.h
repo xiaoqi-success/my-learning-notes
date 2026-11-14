@@ -24,6 +24,8 @@ public:
 private slots:
     void treeItemChanged(QTreeWidgetItem *item,int column);
 
+    bool isUpdating; // 🔥 核心：防止信号递归触发的锁标志位
+
 private:
     Ui::CheckableTreeWidget *ui;
 };

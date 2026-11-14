@@ -12,8 +12,11 @@ CheckableTreeWidget::CheckableTreeWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    isUpdating = false;// 初始化锁
+
     this->resize(1000,500);
     init();
+    // 绑定节点状态改变的信号与槽
     connect(ui->treeWidget,&QTreeWidget::itemChanged,this,&CheckableTreeWidget::treeItemChanged);
 }
 
@@ -110,6 +113,13 @@ void CheckableTreeWidget::updateParentItem(QTreeWidgetItem *item)
 
 void CheckableTreeWidget::treeItemChanged(QTreeWidgetItem *item, int column)
 {
+    Q_UNUSED(column); // 消除未使用参数的警告
+
+    // 核心避坑：如果正在批量更新子节点，直接返回，防止信号无限递归
+    if (isUpdating)
+        return;
+    isUpdating = true; // 加锁
+
     // 只处理"被勾选"的情况，不分层级（顶层/中间层/叶子节点都会进来）
     if(Qt::Checked == item->checkState(0)){
         int count = item->childCount();// 看这个 item 有几个子节点
@@ -133,5 +143,6 @@ void CheckableTreeWidget::treeItemChanged(QTreeWidgetItem *item, int column)
             updateParentItem(item);
         }
     }
+    isUpdating = false; // 解锁
 }
 
