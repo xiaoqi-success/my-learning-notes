@@ -9,7 +9,7 @@
 ### 🟦 Qt 界面开发基础
 - **`QT/CalculateArea`**：[使用 Qt Designer 实现圆面积计算](./QT/CalculateArea/README.md)
 - **`QT/CalculateArea2`**：[纯代码手写实现圆面积计算与防御性编程](./QT/CalculateArea2/README.md)
-- **`QT/QStringPracticeQString`**：[QString 常用 API 实操](./QT/QStringPracticeQString/README.md)
+- **`QT/QStringPractice`**：[QString 常用 API 实操](./QT/QStringPracticeQString/README.md)
 - **`QT/ContainerPractice`**：[QList/QMap 等容器类与迭代器](./QT/ContainerPractice/README.md)
 
 ### 🟩 Qt 界面开发进阶
@@ -22,7 +22,7 @@
 - **`QT/SplitterDemo`**：[QSplitter 分割窗口与 QSettings 状态保存](./QT/SplitterDemo/README.md)
 - **`QT/DockWindows`**：[QDockWidget 停靠窗口与标签页堆叠](./QT/DockWindows/README.md)
 - **`QT/StackedWidget`**：[QStackedWidget 多页面切换导航](./QT/StackedWidget/README.md)
-- **`QT/UserInfoManager`**：[终极实战：多页面用户资料修改系统](./QT/UserInfoManager/README.md)
+- **`QT/MultiPageUserInfoDialog`**：[终极实战：多页面用户资料修改系统](./QT/UserInfoManager/README.md)
 
 ### 🟥 C 语言与底层逻辑
 - (待补充)
