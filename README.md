@@ -24,6 +24,7 @@
 - **`QT/DockWindows`**：[QDockWidget 停靠窗口与标签页堆叠](./QT/DockWindows/README.md)
 - **`QT/StackedWidget`**：[QStackedWidget 多页面切换导航](./QT/StackedWidget/README.md)
 - **`QT/MultiPageUserInfoDialog`**：[终极实战：多页面用户资料修改系统](./QT/MultiPageUserInfoDialog/README.md)
+- **`QT/Progress`**：[Qt 多线程进度模拟演示](./QT/Progress/README.md)
 
 ### 🟥 C 语言与底层逻辑
 - (待补充)
