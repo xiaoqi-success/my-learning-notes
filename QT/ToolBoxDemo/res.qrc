@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/lihua.png</file>
+        <file>icons/lisi.png</file>
+        <file>icons/moshengren.jpg</file>
+        <file>icons/sunwukong.png</file>
+        <file>icons/tangseng.png</file>
+        <file>icons/wangwu.png</file>
+        <file>icons/zhangsan.png</file>
+        <file>icons/zhaoliu.png</file>
+    </qresource>
+</RCC>
