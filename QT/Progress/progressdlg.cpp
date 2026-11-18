@@ -7,7 +7,7 @@ ProgressDlg::ProgressDlg(QWidget *parent)
 {
 //    QWidget *page = new QWidget();
     fileNumLabel = new QLabel("文件数目：",this);
-    fileNumEdit = new QLineEdit(this);
+    fileNumEdit = new QLineEdit("10000",this);
     displayTypeLabel = new QLabel("显示类型：",this);
     displayTypeBox = new QComboBox(this);
     displayTypeBox->addItem("progressBar");
