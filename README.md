@@ -18,6 +18,7 @@
 - **`QT/BasicDialogManager`**：[各种标准对话框大全](./QT/BasicDialogManager/README.md)
 - **`QT/CheckableTreeWidget`**：[带复选框的树形控件与三态联动](./QT/CheckableTreeWidget/README.md)
 - **`QT/ToolBoxDemo`**：[QToolBox 折叠抽屉与工具按钮 (仿QQ好友列表)](./QT/ToolBoxDemo/README.md)
+- **`QT/ElectronicClock`**:[无边框可拖拽电子时钟](./QT/ElectronicClock/README.md)
 
 ### 🟨 Qt 高级布局与综合实战
 - **`QT/SplitterDemo`**：[QSplitter 分割窗口与 QSettings 状态保存](./QT/SplitterDemo/README.md)
