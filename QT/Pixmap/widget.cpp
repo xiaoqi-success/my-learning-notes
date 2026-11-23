@@ -5,7 +5,7 @@
 #include <QPainter>
 
 Widget::Widget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), m_isLoading(false)  // 初始：不在加载
 {
 
     resize(800,500);
@@ -32,33 +32,65 @@ Widget::Widget(QWidget *parent)
     mainLayout->addWidget(showLabel);
     mainLayout->addLayout(gLayout);
 
+    // 补充
+    // 多线程初始化
+    m_worker = new WorkThread();
+    m_thread = new QThread();
+    // 把worker移动到子线程
+    m_worker->moveToThread(m_thread);
+    // 启动线程
+    m_thread->start();
+
     connect(loadBtn,&QPushButton::clicked,this,&Widget::loadClicked);
     connect(scaleBtn,&QPushButton::clicked,this,&Widget::scaleClicked);
     connect(drawBtn,&QPushButton::clicked,this,&Widget::drawClicked);
     connect(saveBtn,&QPushButton::clicked,this,&Widget::saveClicked);
     connect(copyBtn,&QPushButton::clicked,this,&Widget::copyClicked);
+
+    // 补充
+    // 子线程加载完成信号
+    connect(m_worker, &WorkThread::imageReady, this, &Widget::onImageReady);
+    connect(m_worker, &WorkThread::loadFailed, this, &Widget::onLoadFailed);
+    connect(this, &Widget::startLoad,m_worker, &WorkThread::loadImageInThread);
 }
 
 Widget::~Widget()
 {
+    // 退出线程，释放资源（嵌入式必须注意，防止内存泄漏）
+    m_thread->quit();
+    m_thread->wait();
+    delete m_worker;
+    delete m_thread;
 }
 
 // 加载本地图片
+// 补充：点击加载：发送任务给子线程
 void Widget::loadClicked()
 {
+    // 加载失败，直接返回
+    if(m_isLoading){
+        QMessageBox::information(this,"提示","图片正在加载，请勿重复点击...");
+        return;
+    }
     // 先打开图片
-    QString filePath = QFileDialog::getOpenFileName(this,"选择图片","D:/Image","图片(*.png;*.jpg;*.bmp)");
+    QString filePath = QFileDialog::getOpenFileName(this,"选择图片","D:/Image","图片(*.png;*.jpg;*.bmp;)");
     if(filePath.isEmpty()){
         return;
     }
-    // 加载图片
-    m_pix.load(filePath);
-    if(m_pix.isNull()){
-        QMessageBox::warning(this,"错误","图片加载失败");
-        return;
-    }
-    showLabel->setPixmap(m_pix);
-    showLabel->setScaledContents(false);// 禁用掉，自己实现缩放，不开启label自动拉伸
+    // 加载图片:旧的写法，直接在 UI 线程调用m_pix.load()。如果图片很大，读文件会阻塞主线程，窗口卡死、鼠标转圈圈，所以不用了
+//    m_pix.load(filePath);
+//    if(m_pix.isNull()){
+//        QMessageBox::warning(this,"错误","图片加载失败");
+//        return;
+//    }
+//    showLabel->setPixmap(m_pix);
+//    showLabel->setScaledContents(false);// 禁用掉，自己实现缩放，不开启label自动拉伸
+    // 使用多线程
+    // 给子线程发送加载任务
+    // 发信号，任务交给子线程 worker
+
+    m_isLoading = true;// 标记：进入加载状态
+    emit startLoad(filePath);
 }
 
 // 缩放图片
@@ -97,7 +129,9 @@ void Widget::drawClicked()
 // 保存图片
 void Widget::saveClicked()
 {
-    if(m_pix.isNull()){
+    const QPixmap *currentPix = showLabel->pixmap();
+    if (!currentPix || currentPix->isNull()) {
+        QMessageBox::warning(this,"提示","没有可保存的图片");
         return;
     }
     QString savePath = QFileDialog::getSaveFileName(this,"保存图片","C:/Users/Administrator/OneDrive/桌面","PNG(*.png)");
@@ -124,5 +158,21 @@ void Widget::copyClicked()
     QPixmap copyPix = m_pix.copy(20,20,120,120);
 //    m_pix = copyPix; // 把裁剪后的图覆盖原图，后续操作都基于裁好的图
     showLabel->setPixmap(copyPix);
+}
+
+// 补充：子线程加载成功，主线程接收QImage，转QPixmap
+void Widget::onImageReady(const QImage &img)
+{
+    // 主线程才允许 fromImage
+    m_pix = QPixmap::fromImage(img);
+    showLabel->setPixmap(m_pix);
+    showLabel->setScaledContents(false);
+    m_isLoading = false; // 加载完成，解除标记
+}
+
+void Widget::onLoadFailed()
+{
+    QMessageBox::warning(this,"错误","子线程加载图片失败");
+    m_isLoading = false; // 加载失败也要解除标记，不然按钮永久锁死
 }
 
