@@ -11,7 +11,7 @@
 3. **LED2（LED-0603）**：0603 贴片发光二极管，阳极接电阻、阴极接到 GPIO。
 4. GPIO5_3 / SNVS_TAMPER3：同一个引脚的两个名字：
    - `SNVS_TAMPER3`：引脚原始功能，属于 SNVS 域，本来是安全防拆（Tamper）检测输入；
-   - 软件配置复用后，就是 `GPIO5_IO03`，普通通用 IO 口，用来驱动 LED[NXP Semico...](https://www.nxp.com/docs/zh/data-sheet/IMX6ULCEC.pdf?f_link_type=f_linkinlinenote&flow_extra=eyJpbmxpbmVfZGlzcGxheV9wb3NpdGlvbiI6MCwiZG9jX3Bvc2l0aW9uIjowLCJkb2NfaWQiOiJkYzEwMjAxYmMxY2Q2Y2Q1LTk3ZjM3ZDBhZThiM2E1ZjEifQ%3D%3D)。
+   - 软件配置复用后，就是 `GPIO5_IO03`，普通通用 IO 口，用来驱动 LED
 
 ### 亮灭逻辑
 
@@ -49,3 +49,46 @@ GPIO（General Purpose Input/Output）是芯片上的“通用引脚”，可以
 > **计算公式**：`全局编号 = (组号 - 1) * 32 + 引脚号`
 > **计算 GPIO5_3**：`(5 - 1) * 32 + 3 = 131`
 > （以此类推，GPIO1_IO05 就是 (1-1)*32+5 = 5）
+
+## 3.五种点灯方式（从简单到底层）
+
+### 方式一：sysfs 直接操作 GPIO（你实操过的）
+
+**原理**：Linux内核把GPIO抽象成了文件（一切皆文件的思想），通过“写文件”控制硬件。
+
+**完整命令**：
+
+```shell
+# 1. 进入gpio目录
+cd /sys/class/gpio
+
+# 2. 导出引脚131（告诉内核：我要控制这个引脚）
+echo 131 > export
+
+# 3. 进入具体引脚的目录
+cd gpio131
+
+# 4. 设置方向为输出
+echo out > direction
+
+# 5. 点亮（输出低电平0）
+echo 0 > value
+
+# 6. 熄灭（输出高电平1）
+echo 1 > value
+
+# 7. 释放引脚（不使用了，要释放掉）
+cd ..
+echo 131 > unexport
+```
+
+![image-20261124224910596](assets/image-20261124224910596.png)
+
+![image-20261124225026789](assets/image-20261124225026789.png)
+
+![image-20261124225038299](assets/image-20261124225038299.png)
+
+**坑点提醒**：
+
+- 如果 `echo 131 > export` 报错 `Device or resource busy`，说明这个引脚被其他驱动占用了（比如系统自带驱动）。
+- 重启后，GPIO状态会复位，需要重新导出。
