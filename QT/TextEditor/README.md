@@ -72,3 +72,87 @@
 
 - **现象**：读取几十MB的文件时界面卡死。
 - **✅ 解决方案**：把文件读取逻辑放在子线程（`QThread`）中，完成后用信号通知主线程更新 UI。
+
+## 💻 五、核心代码实现
+
+### 1.主框架搭建
+
+```c++
+#ifndef SHOWWIDGET_H
+#define SHOWWIDGET_H
+
+#include <QWidget>
+#include <QLabel>
+#include <QImage>
+#include <QTextEdit>
+
+// 该工程提供主要显示文本编辑函数所在的文件
+
+class ShowWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit ShowWidget(QWidget *parent = nullptr);
+
+    QImage img;
+    QLabel *imageLabel;// 显示图像
+    QTextEdit *text;// 显示文件内容
+
+signals:
+
+};
+
+#endif // SHOWWIDGET_H
+
+#include "showwidget.h"
+
+#include <QHBoxLayout>
+
+ShowWidget::ShowWidget(QWidget *parent) : QWidget(parent)
+{
+    imageLabel = new QLabel();
+//    imageLabel->setGeometry(0,0,1302,886);
+    imageLabel->setScaledContents(true);// 设置标签是否将内容缩放以填满所有可用空间，默认false不填充
+    text = new QTextEdit();
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    mainLayout->addWidget(imageLabel);
+    mainLayout->addWidget(text);
+}
+
+#include "texteditor.h"
+
+TextEditor::TextEditor(QWidget *parent)
+    : QMainWindow(parent)
+{
+    setWindowTitle("文本编辑器");
+    resize(2024,600);
+    showWidget = new ShowWidget(this);
+    setCentralWidget(showWidget);// 创建设置QLabel和文本编辑框的QWidget对象showWidget，并将该QWidget对象设置为中心部件
+//    createActions();
+//    createMenus();
+//    createToolBars();
+    if(img.load(":/images/butterfly.png")){
+        // 在imageLabel对象中设置图片
+        showWidget->imageLabel->setPixmap(QPixmap::fromImage(img).scaled(showWidget->imageLabel->size(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    }
+
+    fileMenu = new QMenu(this);
+}
+
+TextEditor::~TextEditor()
+{
+}
+
+
+```
+
+![image-20261126100101449](assets/image-20261126100101449.png)
+
+### 2.菜单与工具栏的实现
+
+菜单与工具栏都与QAction类密切相关，工具栏上的工具按钮与菜单中的选项条目相对应，完成相同的功能，使用相同的快捷键与图标，QAction类为用户提供一个统一的命令接口，无论是从菜单触发还是从工具栏触发，或通过快捷键触发都调用同样的操作接口，以达到同样的目的。
+
+**1.动作（Action）的实现**
+
+以下是实现基本文件操作的动作（Action）的代码
+

@@ -7,6 +7,9 @@
 
 #include <QTextCharFormat>
 #include <QMenu>
+#include <QMenuBar>
+#include <QAction>
+#include <QToolBar>
 
 class TextEditor : public QMainWindow
 {
@@ -48,7 +51,7 @@ private:
     QAction *rotate270Action;
     QAction *mirrorVerticalAction;
     QAction *mirrorHorizontalAction;
-    QAction *undiActionl;
+    QAction *undoAction;
     QAction *redoAction;
     // 工具栏
     QToolBar *fileTool;
