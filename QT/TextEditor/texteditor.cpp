@@ -7,7 +7,14 @@ TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("文本编辑器");
-    resize(2024,600);
+    setWindowIcon(QIcon(":/icons/textedit.png"));
+    resize(2024,1000);
+
+    // 设置菜单的文字大小
+    QFont menuFont = menuBar()->font();
+    menuFont.setPointSize(10);
+    menuBar()->setFont(menuFont);
+
     showWidget = new ShowWidget(this);
     setCentralWidget(showWidget);// 创建设置QLabel和文本编辑框的QWidget对象showWidget，并将该QWidget对象设置为中心部件
     createActions();// 先造动作（造灵魂）
@@ -36,7 +43,7 @@ void TextEditor::createActions()
     newFileAction->setShortcut(tr("Ctrl+N"));
     newFileAction->setStatusTip("新建一个文件");
     // 退出动作
-    exitAction = new QAction("退出",this);
+    exitAction = new QAction(QIcon(":/icons/quit.png"),"退出",this);
     exitAction->setShortcut(tr("Ctrl+Q"));
     exitAction->setStatusTip("退出程序");
     connect(exitAction,&QAction::triggered,this,&TextEditor::close);
@@ -64,6 +71,9 @@ void TextEditor::createActions()
     // 打印图片动作
     printImageAction = new QAction(QIcon(":/icons/printImg.png"),"打印图片",this);
     printImageAction->setStatusTip("打印一幅图片");
+    // 更换图片动作
+    changeImgAction = new QAction(QIcon(":/icons/changeimg.png"),"更换图片",this);
+    changeImgAction->setStatusTip("更换一张图片");
     // 放大动作
     zoomInAction = new QAction(QIcon(":/icons/zoomin.png"),"放大",this);
     zoomInAction->setStatusTip("放大一张图片");
@@ -118,6 +128,7 @@ void TextEditor::createMenus()
     zoomMenu->addAction(pasteAction);
     zoomMenu->addAction(aboutAction);
     zoomMenu->addSeparator();
+    zoomMenu->addAction(changeImgAction);
     zoomMenu->addAction(zoomInAction);
     zoomMenu->addAction(zoomOutAction);
 
@@ -152,6 +163,7 @@ void TextEditor::createToolBars()
     zoomTool->addAction(cutAction);
     zoomTool->addAction(pasteAction);
     zoomTool->addSeparator();
+    zoomTool->addAction(changeImgAction);
     zoomTool->addAction(zoomInAction);
     zoomTool->addAction(zoomOutAction);
     // 旋转工具条

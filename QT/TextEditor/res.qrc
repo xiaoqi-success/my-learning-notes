@@ -19,5 +19,7 @@
         <file>icons/undo.png</file>
         <file>icons/zoomin.png</file>
         <file>icons/zoomout.png</file>
+        <file>icons/changeimg.png</file>
+        <file>icons/textedit.png</file>
     </qresource>
 </RCC>

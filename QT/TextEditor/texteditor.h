@@ -44,6 +44,7 @@ private:
     QAction *cutAction;
     QAction *pasteAction;
     QAction *aboutAction;
+    QAction *changeImgAction;
     QAction *zoomInAction;
     QAction *zoomOutAction;
     QAction *rotate90Action;
